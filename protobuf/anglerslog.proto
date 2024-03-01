@@ -1,0 +1,629 @@
+syntax = "proto3";
+package anglerslog;
+
+enum Direction {
+  direction_all = 0;
+  direction_none = 1;
+  north = 2;
+  north_east = 3;
+  east = 4;
+  south_east = 5;
+  south = 6;
+  south_west = 7;
+  west = 8;
+  north_west = 9;
+}
+
+enum MeasurementSystem {
+  imperial_whole = 0;
+  imperial_decimal = 1;
+  metric = 2;
+}
+
+enum MoonPhase {
+  moon_phase_all = 0;
+  moon_phase_none = 1;
+  new = 2;
+  waxing_crescent = 3;
+  first_quarter = 4;
+  waxing_gibbous = 5;
+  full = 6;
+  waning_gibbous = 7;
+  last_quarter = 8;
+  waning_crescent = 9;
+}
+
+enum NumberBoundary {
+  number_boundary_any = 0;
+  less_than = 1;
+  less_than_or_equal_to = 2;
+  equal_to = 3;
+  greater_than = 4;
+  greater_than_or_equal_to = 5;
+  range = 6;
+}
+
+enum Period {
+  period_all = 0;
+  period_none = 1;
+  dawn = 2;
+  morning = 3;
+  midday = 4;
+  afternoon = 5;
+  dusk = 6;
+  night = 7;
+  evening = 8;
+}
+
+enum Season {
+  season_all = 0;
+  season_none = 1;
+  winter = 2;
+  spring = 3;
+  summer = 4;
+  autumn = 5;
+}
+
+enum SkyCondition {
+  sky_condition_all = 0;
+  sky_condition_none = 1;
+  snow = 2;
+  drizzle = 3;
+  dust = 4;
+  fog = 5;
+  rain = 6;
+  tornado = 7;
+  hail = 8;
+  ice = 9;
+  storm = 10;
+  mist = 11;
+  smoke = 12;
+  overcast = 13;
+  cloudy = 14;
+  clear = 15;
+  sunny = 16;
+}
+
+enum TideType {
+  tide_type_all = 0;
+  tide_type_none = 1;
+  low = 2;
+  outgoing = 3;
+  high = 4;
+  slack = 5;
+  incoming = 6;
+}
+
+enum Unit {
+  feet = 0;
+  inches = 1;
+  pounds = 2;
+  ounces = 3;
+  fahrenheit = 4;
+  meters = 5;
+  centimeters = 6;
+  kilograms = 7;
+  celsius = 8;
+  miles_per_hour = 9;
+  kilometers_per_hour = 10;
+  millibars = 11;
+  pounds_per_square_inch = 12;
+  miles = 13;
+  kilometers = 14;
+  percent = 15;
+  inch_of_mercury = 16;
+  pound_test = 17;
+  x = 18;
+  hashtag = 19;
+  aught = 20;
+}
+
+enum RodAction {
+  rod_action_all = 0;
+  rod_action_none = 1;
+  x_fast = 2;
+  fast = 3;
+  moderate_fast = 4;
+  moderate = 5;
+  slow = 6;
+}
+
+enum RodPower {
+  rod_power_all = 0;
+  rod_power_none = 1;
+  ultralight = 2;
+  light = 3;
+  medium_light = 4;
+  medium = 5;
+  medium_heavy = 6;
+  heavy = 7;
+  x_heavy = 8;
+  xx_heavy = 9;
+  xxx_heavy = 10;
+}
+
+// A unique ID. An Id is a wrapper for UUID string representation of protobuf bytes type that can
+// be used as keys in a map. The Dart type for protobuf bytes is a List<int>, and [List==] does
+// not do a deep comparison of its elements. An [Id] message wrapper here is purely for semantics
+// to differentiate between a "string" and a "string that is an ID".
+message Id {
+  string uuid = 1;
+}
+
+message Atmosphere {
+  Measurement temperature_deprecated = 1;
+  repeated SkyCondition sky_conditions = 2;
+  Measurement wind_speed_deprecated = 3;
+  Direction wind_direction = 4;
+  Measurement pressure_deprecated = 5;
+  Measurement humidity_deprecated = 6;
+  Measurement visibility_deprecated = 7;
+  MoonPhase moon_phase = 8;
+  uint64 sunrise_timestamp = 9;
+  uint64 sunset_timestamp = 10;
+  string time_zone = 11;
+  MultiMeasurement temperature = 12;
+  MultiMeasurement wind_speed = 13;
+  MultiMeasurement pressure = 14;
+  MultiMeasurement humidity = 15;
+  MultiMeasurement visibility = 16;
+}
+
+message CustomEntity {
+  enum Type {
+    boolean = 0;
+    number = 1;
+    text = 2;
+  }
+
+  Id id = 1;
+  string name = 2;
+  string description = 3;
+  Type type = 4;
+}
+
+message CustomEntityValue {
+  Id custom_entity_id = 1;
+  string value = 2;
+}
+
+message Bait {
+  enum Type {
+    artificial = 0;
+    real = 1;
+    live = 2;
+  }
+
+  Id id = 1;
+  string name = 2;
+  Id bait_category_id = 3;
+  string image_name = 4;
+  Type type = 5;
+  repeated BaitVariant variants = 6;
+}
+
+message BaitVariant {
+  Id id = 1;
+  Id base_id = 2;
+  string color = 3;
+  string model_number = 4;
+  string size = 5;
+  MultiMeasurement min_dive_depth = 6;
+  MultiMeasurement max_dive_depth = 7;
+  string description = 8;
+  repeated CustomEntityValue custom_entity_values = 9;
+}
+
+// A "picked bait" is a Bait or Bait/BaitVariant combination that has been attached to another
+// entity, such as a Catch or Report.
+message BaitAttachment {
+  Id bait_id = 1;
+  Id variant_id = 2;
+}
+
+message BaitCategory {
+  Id id = 1;
+  string name = 2;
+}
+
+message Catch {
+  Id id = 1;
+  uint64 timestamp = 2;
+  repeated BaitAttachment baits = 3;
+  Id fishing_spot_id = 4;
+  Id species_id = 5;
+  repeated string image_names = 6;
+  repeated CustomEntityValue custom_entity_values = 7;
+  Id angler_id = 8;
+  repeated Id method_ids = 9;
+  Period period = 10;
+  bool is_favorite = 11;
+  bool was_catch_and_release = 12;
+  Season season = 13;
+  Id water_clarity_id = 14;
+  MultiMeasurement water_depth = 15;
+  MultiMeasurement water_temperature = 16;
+  MultiMeasurement length = 17;
+  MultiMeasurement weight = 18;
+  uint32 quantity = 19;
+  string notes = 20;
+  Atmosphere atmosphere = 21;
+  Tide tide = 22;
+  string time_zone = 23;
+  repeated Id gear_ids = 24;
+}
+
+message DateRange {
+  enum Period {
+    allDates = 0;
+    today = 1;
+    yesterday = 2;
+    thisWeek = 3;
+    thisMonth = 4;
+    thisYear = 5;
+    lastWeek = 6;
+    lastMonth = 7;
+    lastYear = 8;
+    last7Days = 9;
+    last14Days = 10;
+    last30Days = 11;
+    last60Days = 12;
+    last12Months = 13;
+    custom = 14;
+  }
+
+  Period period = 1;
+
+  // Should only be set for Period.custom.
+  uint64 start_timestamp = 2;
+  uint64 end_timestamp = 3;
+
+  string time_zone = 23;
+}
+
+message BodyOfWater {
+  Id id = 1;
+  string name = 2;
+}
+
+message FishingSpot {
+  Id id = 1;
+  string name = 2;
+  double lat = 3;
+  double lng = 4;
+  Id body_of_water_id = 5;
+  string image_name = 6;
+  string notes = 7;
+}
+
+message NumberFilter {
+  NumberBoundary boundary = 1;
+  MultiMeasurement from = 2;
+  MultiMeasurement to = 3; // Only set for NumberBoundary.range.
+}
+
+message Species {
+  Id id = 1;
+  string name = 2;
+}
+
+message Report {
+  enum Type {
+    summary = 0;
+    comparison = 1;
+  }
+
+  Id id = 1;
+  string name = 2;
+  string description = 3;
+  Type type = 4;
+  DateRange from_date_range = 5;
+  DateRange to_date_range = 6;
+  repeated BaitAttachment baits = 7;
+  repeated Id fishing_spot_ids = 8;
+  repeated Id species_ids = 9;
+  repeated Id angler_ids = 10;
+  repeated Id method_ids = 11;
+  repeated Period periods = 12;
+  bool is_favorites_only = 13;
+  bool is_catch_and_release_only = 14;
+  repeated Season seasons = 15;
+  repeated Id water_clarity_ids = 16;
+  NumberFilter water_depth_filter = 17;
+  NumberFilter water_temperature_filter = 18;
+  NumberFilter length_filter = 19;
+  NumberFilter weight_filter = 20;
+  NumberFilter quantity_filter = 21;
+  NumberFilter air_temperature_filter = 22;
+  NumberFilter air_pressure_filter = 23;
+  NumberFilter air_humidity_filter = 24;
+  NumberFilter air_visibility_filter = 25;
+  NumberFilter wind_speed_filter = 26;
+  repeated Direction wind_directions = 27;
+  repeated SkyCondition sky_conditions = 28;
+  repeated MoonPhase moon_phases = 29;
+  repeated TideType tide_types = 30;
+  repeated Id body_of_water_ids = 31;
+  string time_zone = 32;
+  repeated Id gear_ids = 33;
+}
+
+message Angler {
+  Id id = 1;
+  string name = 2;
+}
+
+message Method {
+  Id id = 1;
+  string name = 2;
+}
+
+message WaterClarity {
+  Id id = 1;
+  string name = 2;
+}
+
+message Trip {
+  message CatchesPerEntity {
+    Id entity_id = 1;
+    uint32 value = 2;
+  }
+
+  message CatchesPerBait {
+    BaitAttachment attachment = 1;
+    uint32 value = 2;
+  }
+
+  Id id = 1;
+  string name = 2;
+  uint64 start_timestamp = 3;
+  uint64 end_timestamp = 4;
+  repeated string image_names = 5;
+  repeated Id catch_ids = 6;
+  repeated Id body_of_water_ids = 7;
+  repeated CatchesPerEntity catches_per_fishing_spot = 8;
+  repeated CatchesPerEntity catches_per_angler = 9;
+  repeated CatchesPerEntity catches_per_species = 10;
+  repeated CatchesPerBait catches_per_bait = 11;
+  repeated CustomEntityValue custom_entity_values = 12;
+  string notes = 13;
+  Atmosphere atmosphere = 14;
+  string time_zone = 15;
+  repeated Id gps_trail_ids = 16;
+}
+
+message Measurement {
+  Unit unit = 1;
+  double value = 2;
+}
+
+// A more accurate version of Measurement to be used with fractional
+// values allowed by the imperial measurement system, such as pounds
+// (mainValue) and ounces (fractionValue).
+message MultiMeasurement {
+  MeasurementSystem system = 1;
+  Measurement main_value = 2;
+  Measurement fraction_value = 3;
+
+  // This is used for a special case for imperial whole system where
+  // the value is between 0 and -1. For example, tide heights.
+  bool is_negative = 4;
+}
+
+message Tide {
+  message Height {
+    uint64 timestamp = 1;
+    double value = 2;
+  }
+
+  TideType type = 1;
+  uint64 first_low_timestamp = 2;
+  uint64 first_high_timestamp = 3;
+  string time_zone = 4;
+  Height height = 5;
+  repeated Height days_heights = 6;
+
+  // There can be up to two low/high times per day.
+  uint64 second_low_timestamp = 7;
+  uint64 second_high_timestamp = 8;
+}
+
+// A message that contains everything needed to filter catches and/or
+// generate reports on a separate dart Isolate.
+message CatchFilterOptions {
+  enum Order {
+    unknown = 0;
+    newest_to_oldest = 1;
+    heaviest_to_lightest = 2;
+    longest_to_shortest = 3;
+  }
+
+  Order order = 1;
+  uint64 current_timestamp = 2;
+  string current_time_zone = 3;
+
+  // Entities that need to be copied since BuildContext (i.e. managers)
+  // can't be accessed in Isolates. Use maps in favor of lists for
+  // efficiency.
+  map<string, Angler> all_anglers = 4;
+  map<string, Bait> all_baits = 5;
+  map<string, BodyOfWater> all_bodies_of_water = 6;
+  map<string, Catch> all_catches = 7;
+  map<string, FishingSpot> all_fishing_spots = 8;
+  map<string, Method> all_methods = 9;
+  map<string, Species> all_species = 10;
+  map<string, WaterClarity> all_water_clarities = 11;
+
+  // All available filters.
+  bool is_catch_and_release_only = 12;
+  bool is_favorites_only = 13;
+  repeated DateRange date_ranges = 14;
+  repeated BaitAttachment baits = 15;
+  repeated Id catch_ids = 16;
+  repeated Id angler_ids = 17;
+  repeated Id fishing_spot_ids = 18;
+  repeated Id body_of_water_ids = 19;
+  repeated Id method_ids = 20;
+  repeated Id species_ids = 21;
+  repeated Id water_clarity_ids = 22;
+  repeated Period periods = 23;
+  repeated Season seasons = 24;
+  repeated Direction wind_directions = 25;
+  repeated SkyCondition sky_conditions = 26;
+  repeated MoonPhase moon_phases = 27;
+  repeated TideType tide_types = 28;
+  NumberFilter water_depth_filter = 29;
+  NumberFilter water_temperature_filter = 30;
+  NumberFilter length_filter = 31;
+  NumberFilter weight_filter = 32;
+  NumberFilter quantity_filter = 33;
+  NumberFilter air_temperature_filter = 34;
+  NumberFilter air_pressure_filter = 35;
+  NumberFilter air_humidity_filter = 36;
+  NumberFilter air_visibility_filter = 37;
+  NumberFilter wind_speed_filter = 38;
+  int32 hour = 39;
+  int32 month = 40;
+
+  // Whether or not each entity is included in a report.
+  // These should be based on user preferences.
+  bool include_anglers = 41;
+  bool include_baits = 42;
+  bool include_bodies_of_water = 43;
+  bool include_methods = 44;
+  bool include_fishing_spots = 45;
+  bool include_moon_phases = 46;
+  bool include_seasons = 47;
+  bool include_species = 48;
+  bool include_tide_types = 49;
+  bool include_periods = 50;
+  bool include_water_clarities = 51;
+
+  map<string, Gear> all_gear = 52;
+  repeated Id gear_ids = 53;
+  bool include_gear = 54;
+}
+
+message CatchReport {
+  repeated CatchReportModel models = 1;
+  uint64 ms_since_last_catch = 2;
+  Catch last_catch = 3;
+
+  // True if one of the date ranges in the report includes the
+  // current time; false otherwise.
+  bool contains_now = 6;
+}
+
+message CatchReportModel {
+  DateRange date_range = 1;
+  repeated Id catch_ids = 2;
+
+  // Hour of day (0-23), and month (1-12) to catch quantity maps.
+  map<int32, int32> per_hour = 3;
+  map<int32, int32> per_month = 4;
+
+  // Enum number to catch quantity maps.
+  map<int32, int32> per_moon_phase = 5;
+  map<int32, int32> per_period = 6;
+  map<int32, int32> per_season = 7;
+  map<int32, int32> per_tide_type = 8;
+
+  // UUID string to catch quantity maps.
+  map<string, int32> per_angler = 9;
+  map<string, int32> per_body_of_water = 10;
+  map<string, int32> per_method = 11;
+  map<string, int32> per_fishing_spot = 12;
+  map<string, int32> per_species = 13;
+  map<string, int32> per_water_clarity = 14;
+
+  // Baits need to work a little different because they are identified
+  // by BaitAttachment, which have a bait ID and variant ID, so the key
+  // in this map is "<bait ID>.<variant ID>"
+  map<string, int32> per_bait = 15;
+
+  map<string, int32> per_gear = 16;
+}
+
+// A message that contains everything needed to filter trips and/or
+// generate reports on a separate dart Isolate.
+message TripFilterOptions {
+  uint64 current_timestamp = 1;
+  string current_time_zone = 2;
+
+  // Copy data normally fetches using the current BuildContext, since
+  // BuildContext is not accessible in an Isolate.
+  map<string, Catch> all_catches = 3;
+  map<string, Trip> all_trips = 4;
+  MeasurementSystem catch_weight_system = 5;
+  MeasurementSystem catch_length_system = 6;
+
+  DateRange date_range = 7;
+  repeated Id trip_ids = 8;
+}
+
+message TripReport {
+  DateRange date_range = 1;
+
+  repeated Trip trips = 2;
+  uint64 total_ms = 3;
+
+  Trip longest_trip = 4;
+  Trip last_trip = 5;
+  uint64 ms_since_last_trip = 6;
+  bool containsNow = 7;
+
+  double average_catches_per_trip = 8;
+  double average_catches_per_hour = 9;
+  uint64 average_ms_between_catches = 10;
+
+  uint64 average_trip_ms = 11;
+  uint64 average_ms_between_trips = 12;
+
+  MultiMeasurement average_weight_per_trip = 13;
+  MultiMeasurement most_weight_in_single_trip = 14;
+  Trip most_weight_trip = 15;
+
+  MultiMeasurement average_length_per_trip = 16;
+  MultiMeasurement most_length_in_single_trip = 17;
+  Trip most_length_trip = 18;
+}
+
+message GpsTrailPoint {
+  uint64 timestamp = 1;
+  double lat = 2;
+  double lng = 3;
+  double heading = 4;
+}
+
+message GpsTrail {
+  Id id = 1;
+  uint64 start_timestamp = 2;
+  uint64 end_timestamp = 3;
+  string time_zone = 4;
+  repeated GpsTrailPoint points = 5;
+  Id body_of_water_id = 6;
+}
+
+message Gear {
+  Id id = 1;
+  string name = 2;
+  string image_name = 3;
+  string rod_make_model = 4;
+  string rod_serial_number = 5;
+  MultiMeasurement rod_length = 6;
+  RodAction rod_action = 7;
+  RodPower rod_power = 8;
+  string reel_make_model = 9;
+  string reel_serial_number = 10;
+  string reel_size = 11;
+  string line_make_model = 12;
+  MultiMeasurement line_rating = 13;
+  string line_color = 14;
+  MultiMeasurement leader_length = 15;
+  MultiMeasurement leader_rating = 16;
+  MultiMeasurement tippet_length = 17;
+  MultiMeasurement tippet_rating = 18;
+  string hook_make_model = 19;
+  MultiMeasurement hook_size = 20;
+  repeated CustomEntityValue custom_entity_values = 21;
+}
