@@ -20,7 +20,6 @@ import '../time_manager.dart';
 import '../user_preference_manager.dart';
 import '../utils/date_time_utils.dart';
 import '../utils/page_utils.dart';
-import '../widgets/fishing_spot_map.dart';
 import '../widgets/widget.dart';
 import '../widgets/add_anything_bottom_sheet.dart';
 import '../wrappers/in_app_review_wrapper.dart';
@@ -73,10 +72,7 @@ class MainPageState extends State<MainPage> {
 
     _navItems = [
       _BarItemModel(
-        page: _NavigatorPage(
-          navigatorKey: GlobalKey<NavigatorState>(),
-          builder: (context) => FishingSpotMap(showGpsTrailButton: true),
-        ),
+       
         iconBuilder: _buildMapIcon,
         titleBuilder: (context) => Strings.of(context).mapPageMenuLabel,
       ),
